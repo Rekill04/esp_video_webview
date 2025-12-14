@@ -38,8 +38,16 @@ class _MainPageState extends State<MainPage> {
   WebViewController? _controller;
 
   bool _showWebView = false;
+  bool _showAppBar = true;
   int _progress = 0;
   String _status = 'Готово';
+
+  @override
+  void didChangeDependencies() {
+    _showAppBar = MediaQuery.of(context).orientation == .portrait;
+    setState(() {});
+    super.didChangeDependencies();
+  }
 
   Future<void> _openStream() async {
     setState(() {
@@ -109,19 +117,21 @@ class _MainPageState extends State<MainPage> {
     final canReload = _showWebView && _controller != null;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ESP32 Stream'),
-        actions: [
-          IconButton(
-            onPressed: canReload ? _reload : null,
-            icon: const Icon(Icons.refresh),
-          ),
-          IconButton(
-            onPressed: _showWebView ? _close : null,
-            icon: const Icon(Icons.close),
-          ),
-        ],
-      ),
+      appBar: _showAppBar
+          ? AppBar(
+              title: const Text('ESP32 Stream'),
+              actions: [
+                IconButton(
+                  onPressed: canReload ? _reload : null,
+                  icon: const Icon(Icons.refresh),
+                ),
+                IconButton(
+                  onPressed: _showWebView ? _close : null,
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            )
+          : null,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -138,9 +148,7 @@ class _MainPageState extends State<MainPage> {
                   ),
                   const SizedBox(height: 8),
                   const Text('URL:'),
-                  const SelectableText(
-                    _kStreamUrl,
-                  ),
+                  const SelectableText(_kStreamUrl),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 10,
@@ -163,10 +171,7 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
           const SizedBox(height: 12),
-          StatusBar(
-            text: _status,
-            progress: _showWebView ? _progress : null,
-          ),
+          StatusBar(text: _status, progress: _showWebView ? _progress : null),
           const SizedBox(height: 16),
           VideoPlayer(showWebView: _showWebView, controller: _controller),
         ],
