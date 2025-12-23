@@ -42,6 +42,13 @@ class _MainPageState extends State<MainPage> {
   int _progress = 0;
   String _status = 'Готово';
 
+  double _speed = 0;
+  double _steering = 0;
+
+  bool _autoCenterSteering = false;
+
+  static const double _kVideoBlockHeight = 280;
+  static const double _kSideControlWidth = 64;
   @override
   void didChangeDependencies() {
     _showAppBar = MediaQuery.of(context).orientation == .portrait;
@@ -112,6 +119,68 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  Widget _verticalSlider({
+    required String title,
+    required IconData icon,
+    required double value,
+    required double min,
+    required double max,
+    required int divisions,
+    required String valueText,
+    required ValueChanged<double> onChanged,
+    VoidCallback? onChangeEnd,
+    Widget? headerTrailing,
+  }) {
+    return SizedBox(
+      width: _kSideControlWidth,
+      height: _kVideoBlockHeight,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+          if (headerTrailing != null) ...[
+            const SizedBox(height: 6),
+            headerTrailing,
+          ],
+          const SizedBox(height: 8),
+          SizedBox(
+            width: _kSideControlWidth,
+            height: _kVideoBlockHeight - (headerTrailing == null ? 86 : 122),
+            child: Center(
+              child: RotatedBox(
+                quarterTurns: -1,
+                child: SizedBox(
+                  width:
+                      _kVideoBlockHeight - (headerTrailing == null ? 86 : 122),
+                  child: Slider(
+                    value: value,
+                    min: min,
+                    max: max,
+                    divisions: divisions,
+                    label: valueText,
+                    onChanged: onChanged,
+                    onChangeEnd: (_) => onChangeEnd?.call(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            valueText,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final canReload = _showWebView && _controller != null;
@@ -172,8 +241,90 @@ class _MainPageState extends State<MainPage> {
           ),
           const SizedBox(height: 12),
           StatusBar(text: _status, progress: _showWebView ? _progress : null),
+
           const SizedBox(height: 16),
-          VideoPlayer(showWebView: _showWebView, controller: _controller),
+
+          Card(
+            elevation: 0,
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SizedBox(
+                height: _kVideoBlockHeight,
+                child: Row(
+                  children: [
+                    _verticalSlider(
+                      title: 'Скорость',
+                      icon: Icons.speed,
+                      value: _speed,
+                      min: 0,
+                      max: 100,
+                      divisions: 100,
+                      valueText: '${_speed.round()}%',
+                      onChanged: (v) {
+                        setState(() => _speed = v);
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: VideoPlayer(
+                          showWebView: _showWebView,
+                          controller: _controller,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _verticalSlider(
+                      title: 'Поворот',
+                      icon: Icons.swap_horiz,
+                      value: _steering,
+                      min: -100,
+                      max: 100,
+                      divisions: 200,
+                      valueText: _steering.round().toString(),
+                      onChanged: (v) {
+                        setState(() => _steering = v);
+                      },
+                      onChangeEnd: () {
+                        if (!_autoCenterSteering) return;
+                        setState(() => _steering = 0);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Card(
+            elevation: 0,
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                crossAxisAlignment: .center,
+                children: [
+                  const Text("Автосброс поворота в 0"),
+                  const Spacer(),
+                  Transform.scale(
+                    scale: 0.85,
+                    child: Switch(
+                      value: _autoCenterSteering,
+                      onChanged: (v) {
+                        setState(() {
+                          _autoCenterSteering = v;
+                          if (_autoCenterSteering) {
+                            _steering = 0;
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

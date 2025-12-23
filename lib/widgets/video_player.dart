@@ -6,8 +6,8 @@ class VideoPlayer extends StatelessWidget {
     super.key,
     required bool showWebView,
     required WebViewController? controller,
-  })  : _showWebView = showWebView,
-        _controller = controller;
+  }) : _showWebView = showWebView,
+       _controller = controller;
 
   final bool _showWebView;
   final WebViewController? _controller;
@@ -22,10 +22,8 @@ class VideoPlayer extends StatelessWidget {
           decoration: const BoxDecoration(color: Colors.black),
           child: _showWebView
               ? (_controller == null)
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : WebViewWidget(controller: _controller)
+                    ? const Center(child: CircularProgressIndicator())
+                    : WebViewWidget(controller: _controller)
               : const Center(
                   child: Text(
                     'Нажми “Открыть”, чтобы посмотреть поток.',
