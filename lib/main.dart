@@ -241,7 +241,35 @@ class _MainPageState extends State<MainPage> {
           ),
           const SizedBox(height: 12),
           StatusBar(text: _status, progress: _showWebView ? _progress : null),
-
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                crossAxisAlignment: .center,
+                children: [
+                  const Text("Автосброс поворота в 0"),
+                  const Spacer(),
+                  Transform.scale(
+                    scale: 0.85,
+                    child: Switch(
+                      value: _autoCenterSteering,
+                      onChanged: (v) {
+                        setState(() {
+                          _autoCenterSteering = v;
+                          if (_autoCenterSteering) {
+                            _steering = 0;
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
 
           Card(
@@ -257,7 +285,7 @@ class _MainPageState extends State<MainPage> {
                       title: 'Скорость',
                       icon: Icons.speed,
                       value: _speed,
-                      min: 0,
+                      min: -100,
                       max: 100,
                       divisions: 100,
                       valueText: '${_speed.round()}%',
@@ -294,34 +322,6 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ],
                 ),
-              ),
-            ),
-          ),
-          Card(
-            elevation: 0,
-            clipBehavior: Clip.antiAlias,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                crossAxisAlignment: .center,
-                children: [
-                  const Text("Автосброс поворота в 0"),
-                  const Spacer(),
-                  Transform.scale(
-                    scale: 0.85,
-                    child: Switch(
-                      value: _autoCenterSteering,
-                      onChanged: (v) {
-                        setState(() {
-                          _autoCenterSteering = v;
-                          if (_autoCenterSteering) {
-                            _steering = 0;
-                          }
-                        });
-                      },
-                    ),
-                  ),
-                ],
               ),
             ),
           ),
